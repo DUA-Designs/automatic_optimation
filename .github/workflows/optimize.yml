@@ -37,8 +37,8 @@ jobs:
 
       - name: Copy files to optimized directory
         run: |
-          # Copy everything from root into optimized/
-          cp -r * optimized/ 2>/dev/null || true
+          # Copy everything from root into optimized/, explicitly excluding node_modules
+          find . -maxdepth 1 -not -name "." -not -name ".." -not -name "node_modules" -exec cp -r {} optimized/ \; 2>/dev/null || true
           # Remove git and github configs from the optimized folder
           rm -rf optimized/.git optimized/.github
 
@@ -48,12 +48,14 @@ jobs:
       - name: Purge Unused CSS
         # Removes unused CSS selectors by comparing CSS files against HTML/JS content
         run: |
-          npx purgecss --css optimized/css/*.css --content "optimized/**/*.html" "optimized/**/*.js" --output optimized/css/
+          # ⚠️ UPDATED PATHS to target the 'evoravillas' folder
+          npx purgecss --css optimized/evoravillas/**/*.css --content "optimized/**/*.html" "optimized/**/*.js" --output optimized/evoravillas/
       
       - name: Minify CSS
         # Clean-css CLI minifies the CSS files in place
         run: |
-          find optimized/css -name '*.css' -exec cleancss -o {} {} \;
+          # ⚠️ UPDATED PATHS to target the 'evoravillas' folder
+          find optimized/evoravillas -name '*.css' -exec cleancss -o {} {} \;
 
       # -------------------------
       # JAVASCRIPT OPTIMIZATION (Minify)
@@ -61,7 +63,8 @@ jobs:
       - name: Minify JavaScript
         # Terser minifies all JavaScript files in the optimized/js directory in place
         run: |
-          find optimized/js -name '*.js' -not -name '*-min.js' -exec sh -c 'terser "$0" -o "$0"' {} \;
+          # ⚠️ UPDATED PATHS to target the 'evoravillas' folder (and root 'js' folder)
+          find optimized/evoravillas optimized/js -name '*.js' -not -name '*-min.js' -exec sh -c 'terser "$0" -o "$0"' {} \;
       
       # -------------------------
       # HTML OPTIMIZATION (Minify)
@@ -69,7 +72,8 @@ jobs:
       - name: Minify HTML
         # Minifies HTML files using the configuration file .html-minifier-config.json
         run: |
-          find optimized -name '*.html' -exec html-minifier-terser --config-file .html-minifier-config.json -o {} {} \;
+          # ⚠️ UPDATED PATHS to target the 'evoravillas' folder
+          find optimized/evoravillas -name '*.html' -exec html-minifier-terser --config-file .html-minifier-config.json -o {} {} \;
 
       # -------------------------
       # IMAGE OPTIMIZATION
@@ -86,7 +90,8 @@ jobs:
       - name: Gzip CSS and JS
         # Gzips the optimized files for server compression
         run: |
-          find optimized/css optimized/js -type f \( -name "*.css" -o -name "*.js" \) -exec gzip -kf {} \;
+          # ⚠️ UPDATED PATHS to target the 'evoravillas' folder (and root 'js' folder)
+          find optimized/evoravillas optimized/js -type f \( -name "*.css" -o -name "*.js" \) -exec gzip -kf {} \;
 
       # -------------------------
       # REPORT
@@ -98,9 +103,10 @@ jobs:
           echo "Generated: $(date)" >> optimization-report.md
           echo "" >> optimization-report.md
           echo "## File Counts" >> optimization-report.md
-          echo "- CSS: $(find css -name '*.css' | wc -l)" >> optimization-report.md
-          echo "- JS: $(find js -name '*.js' | wc -l)" >> optimization-report.md
-          echo "- Images: $(find images -type f | wc -l)" >> optimization-report.md
+          # ⚠️ UPDATED PATHS to target the 'evoravillas' folder
+          echo "- CSS: $(find evoravillas -name '*.css' | wc -l)" >> optimization-report.md
+          echo "- JS: $(find evoravillas js -name '*.js' | wc -l)" >> optimization-report.md
+          echo "- Images: $(find evoravillas images -type f | wc -l)" >> optimization-report.md
 
       # -------------------------
       # PUSH TO optimized BRANCH
