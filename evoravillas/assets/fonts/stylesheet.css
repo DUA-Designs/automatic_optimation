@@ -1,0 +1,182 @@
+@font-face {
+    font-family: 'Addington CF Demi';
+    src: url('AddingtonCF-DemiBold.eot');
+    src: local('Addington CF Demi Bold'), local('AddingtonCF-DemiBold'),
+        url('AddingtonCF-DemiBold.eot?#iefix') format('embedded-opentype'),
+        url('AddingtonCF-DemiBold.woff2') format('woff2'),
+        url('AddingtonCF-DemiBold.woff') format('woff'),
+        url('AddingtonCF-DemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Addington CF';
+    src: url('AddingtonCF-BoldItalic.eot');
+    src: local('Addington CF Bold Italic'), local('AddingtonCF-BoldItalic'),
+        url('AddingtonCF-BoldItalic.eot?#iefix') format('embedded-opentype'),
+        url('AddingtonCF-BoldItalic.woff2') format('woff2'),
+        url('AddingtonCF-BoldItalic.woff') format('woff'),
+        url('AddingtonCF-BoldItalic.ttf') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Addington CF';
+    src: url('AddingtonCF-Bold.eot');
+    src: local('Addington CF Bold'), local('AddingtonCF-Bold'),
+        url('AddingtonCF-Bold.eot?#iefix') format('embedded-opentype'),
+        url('AddingtonCF-Bold.woff2') format('woff2'),
+        url('AddingtonCF-Bold.woff') format('woff'),
+        url('AddingtonCF-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Addington CF Extra';
+    src: url('AddingtonCF-ExtraBold.eot');
+    src: local('Addington CF Extra Bold'), local('AddingtonCF-ExtraBold'),
+        url('AddingtonCF-ExtraBold.eot?#iefix') format('embedded-opentype'),
+        url('AddingtonCF-ExtraBold.woff2') format('woff2'),
+        url('AddingtonCF-ExtraBold.woff') format('woff'),
+        url('AddingtonCF-ExtraBold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Addington CF';
+    src: url('AddingtonCF-MediumItalic.eot');
+    src: local('Addington CF Medium Italic'), local('AddingtonCF-MediumItalic'),
+        url('AddingtonCF-MediumItalic.eot?#iefix') format('embedded-opentype'),
+        url('AddingtonCF-MediumItalic.woff2') format('woff2'),
+        url('AddingtonCF-MediumItalic.woff') format('woff'),
+        url('AddingtonCF-MediumItalic.ttf') format('truetype');
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Addington CF';
+    src: url('AddingtonCF-Medium.eot');
+    src: local('Addington CF Medium'), local('AddingtonCF-Medium'),
+        url('AddingtonCF-Medium.eot?#iefix') format('embedded-opentype'),
+        url('AddingtonCF-Medium.woff2') format('woff2'),
+        url('AddingtonCF-Medium.woff') format('woff'),
+        url('AddingtonCF-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Addington CF';
+    src: url('AddingtonCF-Regular.eot');
+    src: local('Addington CF Regular'), local('AddingtonCF-Regular'),
+        url('AddingtonCF-Regular.eot?#iefix') format('embedded-opentype'),
+        url('AddingtonCF-Regular.woff2') format('woff2'),
+        url('AddingtonCF-Regular.woff') format('woff'),
+        url('AddingtonCF-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Addington CF Extra';
+    src: url('AddingtonCF-ExtraBoldItalic.eot');
+    src: local('Addington CF Extra Bold Italic'), local('AddingtonCF-ExtraBoldItalic'),
+        url('AddingtonCF-ExtraBoldItalic.eot?#iefix') format('embedded-opentype'),
+        url('AddingtonCF-ExtraBoldItalic.woff2') format('woff2'),
+        url('AddingtonCF-ExtraBoldItalic.woff') format('woff'),
+        url('AddingtonCF-ExtraBoldItalic.ttf') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Addington CF';
+    src: url('AddingtonCF-Thin.eot');
+    src: local('Addington CF Thin'), local('AddingtonCF-Thin'),
+        url('AddingtonCF-Thin.eot?#iefix') format('embedded-opentype'),
+        url('AddingtonCF-Thin.woff2') format('woff2'),
+        url('AddingtonCF-Thin.woff') format('woff'),
+        url('AddingtonCF-Thin.ttf') format('truetype');
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Addington CF';
+    src: url('AddingtonCF-ThinItalic.eot');
+    src: local('Addington CF Thin Italic'), local('AddingtonCF-ThinItalic'),
+        url('AddingtonCF-ThinItalic.eot?#iefix') format('embedded-opentype'),
+        url('AddingtonCF-ThinItalic.woff2') format('woff2'),
+        url('AddingtonCF-ThinItalic.woff') format('woff'),
+        url('AddingtonCF-ThinItalic.ttf') format('truetype');
+    font-weight: 100;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Addington CF Demi';
+    src: url('AddingtonCF-DemiBoldItalic.eot');
+    src: local('Addington CF Demi Bold Italic'), local('AddingtonCF-DemiBoldItalic'),
+        url('AddingtonCF-DemiBoldItalic.eot?#iefix') format('embedded-opentype'),
+        url('AddingtonCF-DemiBoldItalic.woff2') format('woff2'),
+        url('AddingtonCF-DemiBoldItalic.woff') format('woff'),
+        url('AddingtonCF-DemiBoldItalic.ttf') format('truetype');
+    font-weight: 600;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Addington CF';
+    src: url('AddingtonCF-Light.eot');
+    src: local('Addington CF Light'), local('AddingtonCF-Light'),
+        url('AddingtonCF-Light.eot?#iefix') format('embedded-opentype'),
+        url('AddingtonCF-Light.woff2') format('woff2'),
+        url('AddingtonCF-Light.woff') format('woff'),
+        url('AddingtonCF-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Addington CF';
+    src: url('AddingtonCF-LightItalic.eot');
+    src: local('Addington CF Light Italic'), local('AddingtonCF-LightItalic'),
+        url('AddingtonCF-LightItalic.eot?#iefix') format('embedded-opentype'),
+        url('AddingtonCF-LightItalic.woff2') format('woff2'),
+        url('AddingtonCF-LightItalic.woff') format('woff'),
+        url('AddingtonCF-LightItalic.ttf') format('truetype');
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Addington CF';
+    src: url('AddingtonCF-RegularItalic.eot');
+    src: local('Addington CF Regular Italic'), local('AddingtonCF-RegularItalic'),
+        url('AddingtonCF-RegularItalic.eot?#iefix') format('embedded-opentype'),
+        url('AddingtonCF-RegularItalic.woff2') format('woff2'),
+        url('AddingtonCF-RegularItalic.woff') format('woff'),
+        url('AddingtonCF-RegularItalic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: italic;
+    font-display: swap;
+}
+
