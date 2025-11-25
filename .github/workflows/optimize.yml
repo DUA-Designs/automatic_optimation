@@ -22,15 +22,16 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
+      - name: Install dependencies (Image Resizing Focus)
         run: |
           sudo apt-get update
           sudo apt-get install -y libvips-tools
 
-          # Ensure sharp, glob, and mkdirp are installed for image processing
+          # Only installing dependencies needed for sharp, glob, and mkdirp
           npm install sharp glob mkdirp 
-          npm install --save-dev html-minifier-terser clean-css-cli terser purgecss
-          npm install @squoosh/cli@0.7.1
+          # The following lines are commented out as requested:
+          # npm install --save-dev html-minifier-terser clean-css-cli terser purgecss
+          # npm install @squoosh/cli@0.7.1
 
       - name: Create optimized directory
         run: mkdir -p optimized
@@ -43,55 +44,46 @@ jobs:
           rm -rf optimized/.git optimized/.github
 
       # -------------------------
-      # CSS OPTIMIZATION (Purge and Minify)
+      # CSS OPTIMIZATION (Purge and Minify) - SKIPPED
       # -------------------------
-      - name: Purge Unused CSS
-        # Removes unused CSS selectors by comparing CSS files against HTML/JS content
-        run: |
-          # ⚠️ UPDATED PATHS to target the 'evoravillas' folder
-          npx purgecss --css optimized/evoravillas/**/*.css --content "optimized/**/*.html" "optimized/**/*.js" --output optimized/evoravillas/
+      # - name: Purge Unused CSS
+      #   run: |
+      #     npx purgecss --css optimized/evoravillas/**/*.css --content "optimized/**/*.html" "optimized/**/*.js" --output optimized/evoravillas/
       
-      - name: Minify CSS
-        # Clean-css CLI minifies the CSS files in place
-        run: |
-          # ⚠️ UPDATED PATHS to target the 'evoravillas' folder
-          find optimized/evoravillas -name '*.css' -exec cleancss -o {} {} \;
+      # - name: Minify CSS
+      #   run: |
+      #     find optimized/evoravillas -name '*.css' -exec cleancss -o {} {} \;
 
       # -------------------------
-      # JAVASCRIPT OPTIMIZATION (Minify)
+      # JAVASCRIPT OPTIMIZATION (Minify) - SKIPPED
       # -------------------------
-      - name: Minify JavaScript
-        # Terser minifies all JavaScript files in the optimized/js directory in place
-        run: |
-          # ⚠️ UPDATED PATHS to target the 'evoravillas' folder (and root 'js' folder)
-          find optimized/evoravillas optimized/js -name '*.js' -not -name '*-min.js' -exec sh -c 'terser "$0" -o "$0"' {} \;
+      # - name: Minify JavaScript
+      #   run: |
+      #     find optimized/evoravillas optimized/js -name '*.js' -not -name '*-min.js' -exec sh -c 'terser "$0" -o "$0"' {} \;
       
       # -------------------------
-      # HTML OPTIMIZATION (Minify)
+      # HTML OPTIMIZATION (Minify) - SKIPPED
       # -------------------------
-      - name: Minify HTML
-        # Minifies HTML files using the configuration file .html-minifier-config.json
-        run: |
-          # ⚠️ UPDATED PATHS to target the 'evoravillas' folder
-          find optimized/evoravillas -name '*.html' -exec html-minifier-terser --config-file .html-minifier-config.json -o {} {} \;
+      # - name: Minify HTML
+      #   run: |
+      #     find optimized/evoravillas -name '*.html' -exec html-minifier-terser --config-file .html-minifier-config.json -o {} {} \;
 
       # -------------------------
-      # IMAGE OPTIMIZATION
+      # IMAGE OPTIMIZATION - FOCUS
       # -------------------------
 
       - name: Generate Responsive Images
         # Uses your resize script to create responsive images within 'optimized/'
-        run: node js/resize-images.js
+        run: node ../js/resize-images.js
+        working-directory: optimized
 
 
       # -------------------------
-      # GZIP ASSETS (Will now find the directories correctly)
+      # GZIP ASSETS - SKIPPED
       # -------------------------
-      - name: Gzip CSS and JS
-        # Gzips the optimized files for server compression
-        run: |
-          # ⚠️ UPDATED PATHS to target the 'evoravillas' folder (and root 'js' folder)
-          find optimized/evoravillas optimized/js -type f \( -name "*.css" -o -name "*.js" \) -exec gzip -kf {} \;
+      # - name: Gzip CSS and JS
+      #   run: |
+      #     find optimized/evoravillas optimized/js -type f \( -name "*.css" -o -name "*.js" \) -exec gzip -kf {} \;
 
       # -------------------------
       # REPORT
@@ -103,7 +95,7 @@ jobs:
           echo "Generated: $(date)" >> optimization-report.md
           echo "" >> optimization-report.md
           echo "## File Counts" >> optimization-report.md
-          # ⚠️ UPDATED PATHS to target the 'evoravillas' folder
+          # Reporting still runs, but only for the unminified/resized files
           echo "- CSS: $(find evoravillas -name '*.css' | wc -l)" >> optimization-report.md
           echo "- JS: $(find evoravillas js -name '*.js' | wc -l)" >> optimization-report.md
           echo "- Images: $(find evoravillas images -type f | wc -l)" >> optimization-report.md
@@ -129,7 +121,7 @@ jobs:
           rm -rf optimized
 
           git add .
-          git commit -m "🔥 Optimized website assets (CSS/JS minified, images optimized)" || echo "No changes"
+          git commit -m "🔥 Optimized website assets (Image resizing only)" || echo "No changes"
           git push origin optimized --force
 
       - name: Upload optimization report
