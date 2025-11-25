@@ -1,4 +1,4 @@
-name: Website Image Resize & Optimize
+name: Website Image Resize & Optimize (fixed)
 
 on:
   push:
@@ -34,24 +34,55 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends libvips-tools || true
 
-      - name: Install npm dependencies
+      - name: Install npm dependencies (no lockfile)
         run: |
-          npm ci
+          npm install
           npm install --no-save sharp glob mkdirp || true
 
-      - name: Create optimized directory
+      - name: Create optimized working directory
         run: mkdir -p optimized
 
       - name: Copy repository to optimized workspace (safe)
         run: |
+          # Copy everything except .git and node_modules into optimized/
           rsync -a --exclude='.git' --exclude='node_modules' --exclude='optimized' ./ optimized/ || true
           rm -rf optimized/.github optimized/.git || true
 
-      - name: Run image resize script
-        working-directory: ./optimized
-        run: node ../js/resize-images.js
+      - name: Debug: list optimized contents BEFORE resize
+        run: |
+          echo "PWD: $PWD"
+          echo "Top-level:"
+          ls -la
+          echo ""
+          echo "Optimized dir listing:"
+          ls -la optimized || true
+          echo ""
+          echo "Optimized/js exists?"
+          [ -d optimized/js ] && echo "yes: optimized/js" || echo "no optimized/js"
 
-      - name: Create optimization report
+      - name: Run image resize script (inside optimized)
+        working-directory: ./optimized
+        run: |
+          # run the script that exists at optimized/js/resize-images.js
+          if [ -f js/resize-images.js ]; then
+            node js/resize-images.js
+          else
+            echo "ERROR: js/resize-images.js not found inside optimized/; aborting"
+            ls -la js || true
+            exit 1
+          fi
+
+      - name: Debug: list optimized contents AFTER resize
+        run: |
+          echo "Listing optimized root:"
+          ls -la optimized || true
+          echo ""
+          echo "Check some size directories (if present):"
+          find optimized -maxdepth 4 -type d -name '*w' -print || true
+          echo ""
+          du -sh optimized || true
+
+      - name: Create optimization report (copy to workspace root)
         run: |
           cd optimized || exit 0
           REPORT=optimization-report.md
@@ -60,20 +91,36 @@ jobs:
           echo "" >> "$REPORT"
           echo "## Resized counts" >> "$REPORT"
           echo "- Images (original): $(find . -type f -iregex '.*\.\(jpg\|jpeg\|png\|webp\)' | wc -l)" >> "$REPORT"
-          echo "- 320w: $(find . -path '*/320w/*' -type f 2>/dev/null | wc -l)" >> "$REPORT"
-          echo "- 480w: $(find . -path '*/480w/*' -type f 2>/dev/null | wc -l)" >> "$REPORT"
-          echo "- 768w: $(find . -path '*/768w/*' -type f 2>/dev/null | wc -l)" >> "$REPORT"
-          echo "- 1024w: $(find . -path '*/1024w/*' -type f 2>/dev/null | wc -l)" >> "$REPORT"
-          echo "- 1440w: $(find . -path '*/1440w/*' -type f 2>/dev/null | wc -l)" >> "$REPORT"
-          cp "$REPORT" ../
+          for s in 320 480 768 1024 1440; do
+            echo "- ${s}w: $(find . -path \"*/${s}w/*\" -type f 2>/dev/null | wc -l)" >> "$REPORT"
+          done
+          cp "$REPORT" ../optimization-report.md || true
+          echo "Report created at: $GITHUB_WORKSPACE/optimization-report.md"
+
+      - name: Final debug (show report and optimized preview)
+        run: |
+          echo "Report preview:"
+          head -n 40 optimization-report.md || true
+          echo ""
+          echo "List optimized top level again:"
+          ls -la optimized || true
 
       - name: Upload optimization report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: resize-optimization-report
           path: optimization-report.md
 
+      - name: Upload optimized folder (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: optimized-folder
+          path: optimized/**
+
       - name: Commit and push optimized files to optimized branch
+        if: always()
         env:
           GIT_COMMITTER_NAME: "GitHub Actions"
           GIT_COMMITTER_EMAIL: "actions@github.com"
@@ -82,11 +129,13 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
+          # prepare temp clone to avoid touching workflow files in workspace
           rm -rf /tmp/optimized-repo || true
           git clone --branch optimized --single-branch https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} /tmp/optimized-repo || git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} /tmp/optimized-repo
           cd /tmp/optimized-repo
           git checkout -B optimized || git checkout --orphan optimized
 
+          # replace contents with optimized workspace
           git rm -rf . || true
           cp -a $GITHUB_WORKSPACE/optimized/. . || true
           cp -f $GITHUB_WORKSPACE/optimization-report.md ./optimization-report.md || true
@@ -98,11 +147,4 @@ jobs:
             git commit -m "🔧 Resized images and produced WebP variants"
           fi
 
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:optimized --force
-
-      - name: Upload optimized folder (artifact)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: optimized-folder
-          path: optimized
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:optimized --force || true
