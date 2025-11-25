@@ -36,7 +36,7 @@ jobs:
 
       - name: Install npm dependencies
         run: |
-          npm install
+          npm ci
           npm install --no-save sharp glob mkdirp || true
 
       - name: Create optimized directory
@@ -60,4 +60,49 @@ jobs:
           echo "" >> "$REPORT"
           echo "## Resized counts" >> "$REPORT"
           echo "- Images (original): $(find . -type f -iregex '.*\.\(jpg\|jpeg\|png\|webp\)' | wc -l)" >> "$REPORT"
-          echo "- 320w: $(find
+          echo "- 320w: $(find . -path '*/320w/*' -type f 2>/dev/null | wc -l)" >> "$REPORT"
+          echo "- 480w: $(find . -path '*/480w/*' -type f 2>/dev/null | wc -l)" >> "$REPORT"
+          echo "- 768w: $(find . -path '*/768w/*' -type f 2>/dev/null | wc -l)" >> "$REPORT"
+          echo "- 1024w: $(find . -path '*/1024w/*' -type f 2>/dev/null | wc -l)" >> "$REPORT"
+          echo "- 1440w: $(find . -path '*/1440w/*' -type f 2>/dev/null | wc -l)" >> "$REPORT"
+          cp "$REPORT" ../
+
+      - name: Upload optimization report
+        uses: actions/upload-artifact@v4
+        with:
+          name: resize-optimization-report
+          path: optimization-report.md
+
+      - name: Commit and push optimized files to optimized branch
+        env:
+          GIT_COMMITTER_NAME: "GitHub Actions"
+          GIT_COMMITTER_EMAIL: "actions@github.com"
+        run: |
+          set -eux
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+          rm -rf /tmp/optimized-repo || true
+          git clone --branch optimized --single-branch https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} /tmp/optimized-repo || git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} /tmp/optimized-repo
+          cd /tmp/optimized-repo
+          git checkout -B optimized || git checkout --orphan optimized
+
+          git rm -rf . || true
+          cp -a $GITHUB_WORKSPACE/optimized/. . || true
+          cp -f $GITHUB_WORKSPACE/optimization-report.md ./optimization-report.md || true
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "🔧 Resized images and produced WebP variants"
+          fi
+
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:optimized --force
+
+      - name: Upload optimized folder (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: optimized-folder
+          path: optimized
