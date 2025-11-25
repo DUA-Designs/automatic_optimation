@@ -36,7 +36,7 @@ jobs:
 
       - name: Install npm dependencies
         run: |
-          npm ci
+          npm install
           npm install --no-save sharp glob mkdirp || true
 
       - name: Create optimized directory
