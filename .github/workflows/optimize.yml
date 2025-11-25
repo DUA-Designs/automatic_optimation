@@ -22,68 +22,40 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies (Image Resizing Focus)
+      - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y libvips-tools
 
-          # Only installing dependencies needed for sharp, glob, and mkdirp
-          npm install sharp glob mkdirp 
-          # The following lines are commented out as requested:
-          # npm install --save-dev html-minifier-terser clean-css-cli terser purgecss
-          # npm install @squoosh/cli@0.7.1
+          npm install sharp glob
+          npm install --save-dev html-minifier-terser clean-css-cli terser purgecss
+          npm install @squoosh/cli@0.7.1
 
       - name: Create optimized directory
         run: mkdir -p optimized
 
       - name: Copy files to optimized directory
         run: |
-          # Copy everything from root into optimized/, explicitly excluding node_modules
-          find . -maxdepth 1 -not -name "." -not -name ".." -not -name "node_modules" -exec cp -r {} optimized/ \; 2>/dev/null || true
-          # Remove git and github configs from the optimized folder
-          rm -rf optimized/.git optimized/.github
+          cp -r * optimized/ 2>/dev/null || true
+          cd optimized
+          rm -rf .git .github
 
       # -------------------------
-      # CSS OPTIMIZATION (Purge and Minify) - SKIPPED
-      # -------------------------
-      # - name: Purge Unused CSS
-      #   run: |
-      #     npx purgecss --css optimized/evoravillas/**/*.css --content "optimized/**/*.html" "optimized/**/*.js" --output optimized/evoravillas/
-      
-      # - name: Minify CSS
-      #   run: |
-      #     find optimized/evoravillas -name '*.css' -exec cleancss -o {} {} \;
-
-      # -------------------------
-      # JAVASCRIPT OPTIMIZATION (Minify) - SKIPPED
-      # -------------------------
-      # - name: Minify JavaScript
-      #   run: |
-      #     find optimized/evoravillas optimized/js -name '*.js' -not -name '*-min.js' -exec sh -c 'terser "$0" -o "$0"' {} \;
-      
-      # -------------------------
-      # HTML OPTIMIZATION (Minify) - SKIPPED
-      # -------------------------
-      # - name: Minify HTML
-      #   run: |
-      #     find optimized/evoravillas -name '*.html' -exec html-minifier-terser --config-file .html-minifier-config.json -o {} {} \;
-
-      # -------------------------
-      # IMAGE OPTIMIZATION - FOCUS
+      # IMAGE OPTIMIZATION
       # -------------------------
 
       - name: Generate Responsive Images
-        # Uses your resize script to create responsive images within 'optimized/'
-        run: node ../js/resize-images.js
-        working-directory: optimized
+        run: node js/resize-images.js
 
+      - name: Convert Images to WebP
+        run: node js/convert-webp.js
 
       # -------------------------
-      # GZIP ASSETS - SKIPPED
+      # GZIP ASSETS
       # -------------------------
-      # - name: Gzip CSS and JS
-      #   run: |
-      #     find optimized/evoravillas optimized/js -type f \( -name "*.css" -o -name "*.js" \) -exec gzip -kf {} \;
+      - name: Gzip CSS and JS
+        run: |
+          find optimized/css optimized/js -type f \( -name "*.css" -o -name "*.js" \) -exec gzip -kf {} \;
 
       # -------------------------
       # REPORT
@@ -95,18 +67,16 @@ jobs:
           echo "Generated: $(date)" >> optimization-report.md
           echo "" >> optimization-report.md
           echo "## File Counts" >> optimization-report.md
-          # Reporting still runs, but only for the unminified/resized files
-          echo "- CSS: $(find evoravillas -name '*.css' | wc -l)" >> optimization-report.md
-          echo "- JS: $(find evoravillas js -name '*.js' | wc -l)" >> optimization-report.md
-          echo "- Images: $(find evoravillas images -type f | wc -l)" >> optimization-report.md
+          echo "- CSS: $(find css -name '*.css' | wc -l)" >> optimization-report.md
+          echo "- JS: $(find js -name '*.js' | wc -l)" >> optimization-report.md
+          echo "- Images: $(find images -type f | wc -l)" >> optimization-report.md
 
       # -------------------------
       # PUSH TO optimized BRANCH
       # -------------------------
 
       - name: Configure git
-        # Using github.repository variable is more robust
-        run: git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        run: git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/KommineniCharan/techmech.git
 
       - name: Commit and push optimized files
         run: |
@@ -121,7 +91,7 @@ jobs:
           rm -rf optimized
 
           git add .
-          git commit -m "🔥 Optimized website assets (Image resizing only)" || echo "No changes"
+          git commit -m "🔥 Optimized website assets (CSS/JS minified, images optimized)" || echo "No changes"
           git push origin optimized --force
 
       - name: Upload optimization report
