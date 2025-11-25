@@ -76,7 +76,7 @@ jobs:
       # -------------------------
 
       - name: Configure git
-        run: git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/KommineniCharan/techmech.git
+        run: git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com//automatic_optimation.git
 
       - name: Commit and push optimized files
         run: |
