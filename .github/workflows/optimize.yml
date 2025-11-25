@@ -27,7 +27,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libvips-tools
 
-          npm install sharp glob mkdirp
+          # Ensure sharp, glob, and mkdirp are installed for image processing
+          npm install sharp glob mkdirp 
           npm install --save-dev html-minifier-terser clean-css-cli terser purgecss
           npm install @squoosh/cli@0.7.1
 
@@ -36,24 +37,54 @@ jobs:
 
       - name: Copy files to optimized directory
         run: |
+          # Copy everything from root into optimized/
           cp -r * optimized/ 2>/dev/null || true
-          cd optimized
-          rm -rf .git .github
+          # Remove git and github configs from the optimized folder
+          rm -rf optimized/.git optimized/.github
+
+      # -------------------------
+      # CSS OPTIMIZATION (Purge and Minify)
+      # -------------------------
+      - name: Purge Unused CSS
+        # Removes unused CSS selectors by comparing CSS files against HTML/JS content
+        run: |
+          npx purgecss --css optimized/css/*.css --content "optimized/**/*.html" "optimized/**/*.js" --out optimized/css/
+      
+      - name: Minify CSS
+        # Clean-css CLI minifies the CSS files in place
+        run: |
+          find optimized/css -name '*.css' -exec cleancss -o {} {} \;
+
+      # -------------------------
+      # JAVASCRIPT OPTIMIZATION (Minify)
+      # -------------------------
+      - name: Minify JavaScript
+        # Terser minifies all JavaScript files in the optimized/js directory in place
+        run: |
+          find optimized/js -name '*.js' -not -name '*-min.js' -exec sh -c 'terser "$0" -o "$0"' {} \;
+      
+      # -------------------------
+      # HTML OPTIMIZATION (Minify)
+      # -------------------------
+      - name: Minify HTML
+        # Minifies HTML files using the configuration file .html-minifier-config.json
+        run: |
+          find optimized -name '*.html' -exec html-minifier-terser --config-file .html-minifier-config.json -o {} {} \;
 
       # -------------------------
       # IMAGE OPTIMIZATION
       # -------------------------
 
       - name: Generate Responsive Images
+        # Uses your resize script to create responsive images within 'optimized/'
         run: node js/resize-images.js
 
-      # - name: Convert Images to WebP
-      #   run: node js/convert-webp.js
 
       # -------------------------
-      # GZIP ASSETS
+      # GZIP ASSETS (Will now find the directories correctly)
       # -------------------------
       - name: Gzip CSS and JS
+        # Gzips the optimized files for server compression
         run: |
           find optimized/css optimized/js -type f \( -name "*.css" -o -name "*.js" \) -exec gzip -kf {} \;
 
@@ -76,7 +107,8 @@ jobs:
       # -------------------------
 
       - name: Configure git
-        run: git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/KommineniCharan/techmech.git
+        # Using github.repository variable is more robust
+        run: git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
       - name: Commit and push optimized files
         run: |
