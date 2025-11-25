@@ -1,4 +1,4 @@
-name: Website Image Resize & Optimize (fixed)
+name: Website Image Resize & Optimize
 
 on:
   push:
@@ -44,26 +44,21 @@ jobs:
 
       - name: Copy repository to optimized workspace (safe)
         run: |
-          # Copy everything except .git and node_modules into optimized/
           rsync -a --exclude='.git' --exclude='node_modules' --exclude='optimized' ./ optimized/ || true
           rm -rf optimized/.github optimized/.git || true
 
       - name: Debug: list optimized contents BEFORE resize
         run: |
           echo "PWD: $PWD"
-          echo "Top-level:"
+          echo "Top-level listing:"
           ls -la
           echo ""
-          echo "Optimized dir listing:"
+          echo "optimized directory listing:"
           ls -la optimized || true
-          echo ""
-          echo "Optimized/js exists?"
-          [ -d optimized/js ] && echo "yes: optimized/js" || echo "no optimized/js"
 
       - name: Run image resize script (inside optimized)
         working-directory: ./optimized
         run: |
-          # run the script that exists at optimized/js/resize-images.js
           if [ -f js/resize-images.js ]; then
             node js/resize-images.js
           else
@@ -77,9 +72,8 @@ jobs:
           echo "Listing optimized root:"
           ls -la optimized || true
           echo ""
-          echo "Check some size directories (if present):"
-          find optimized -maxdepth 4 -type d -name '*w' -print || true
-          echo ""
+          echo "Find any '*w' directories created:"
+          find optimized -maxdepth 5 -type d -name '*w' -print || true
           du -sh optimized || true
 
       - name: Create optimization report (copy to workspace root)
@@ -96,14 +90,6 @@ jobs:
           done
           cp "$REPORT" ../optimization-report.md || true
           echo "Report created at: $GITHUB_WORKSPACE/optimization-report.md"
-
-      - name: Final debug (show report and optimized preview)
-        run: |
-          echo "Report preview:"
-          head -n 40 optimization-report.md || true
-          echo ""
-          echo "List optimized top level again:"
-          ls -la optimized || true
 
       - name: Upload optimization report
         if: always()
@@ -129,22 +115,11 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
-          # prepare temp clone to avoid touching workflow files in workspace
           rm -rf /tmp/optimized-repo || true
           git clone --branch optimized --single-branch https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} /tmp/optimized-repo || git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} /tmp/optimized-repo
           cd /tmp/optimized-repo
           git checkout -B optimized || git checkout --orphan optimized
 
-          # replace contents with optimized workspace
           git rm -rf . || true
           cp -a $GITHUB_WORKSPACE/optimized/. . || true
-          cp -f $GITHUB_WORKSPACE/optimization-report.md ./optimization-report.md || true
-
-          git add -A
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "🔧 Resized images and produced WebP variants"
-          fi
-
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:optimized --force || true
+          cp -f $GITHUB_WORKSPACE/optimization-report_
