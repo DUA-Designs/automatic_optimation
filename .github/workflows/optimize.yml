@@ -53,9 +53,9 @@ jobs:
       # -------------------------
       # GZIP ASSETS
       # -------------------------
-      - name: Gzip CSS and JS
-        run: |
-          find optimized/css optimized/js -type f \( -name "*.css" -o -name "*.js" \) -exec gzip -kf {} \;
+      # - name: Gzip CSS and JS
+      #   run: |
+      #     find optimized/css optimized/js -type f \( -name "*.css" -o -name "*.js" \) -exec gzip -kf {} \;
 
       # -------------------------
       # REPORT
