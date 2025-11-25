@@ -48,7 +48,7 @@ jobs:
       - name: Purge Unused CSS
         # Removes unused CSS selectors by comparing CSS files against HTML/JS content
         run: |
-          npx purgecss --css optimized/css/*.css --content "optimized/**/*.html" "optimized/**/*.js" --out optimized/css/
+          npx purgecss --css optimized/css/*.css --content "optimized/**/*.html" "optimized/**/*.js" --output optimized/css/
       
       - name: Minify CSS
         # Clean-css CLI minifies the CSS files in place
