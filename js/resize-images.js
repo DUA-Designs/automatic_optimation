@@ -3,11 +3,13 @@ const path = require('path');
 const fs = require('fs/promises');
 const fsSync = require('fs');
 const sharp = require('sharp');
-const glob = require('glob');
+// ⬇️ UPDATED: Change how 'glob' is imported. Use named export if available.
+const { glob } = require('glob'); 
 const mkdirp = require('mkdirp');
-const { promisify } = require('util'); // 👈 ADDED: For converting glob to an async function
+const { promisify } = require('util'); 
 
-const globAsync = promisify(glob); // 👈 ADDED: The corrected way to use glob with async/await
+// Ensure we are promisifying the function, not the module object
+const globAsync = promisify(glob); 
 
 const sizes = [320, 480, 768, 1024, 1440];
 const qualityJpeg = 82;
@@ -41,7 +43,6 @@ async function processFile(file) {
             .toFile(jpgOut);
         }
       } catch {
-        // Fallback to PNG if JPG conversion fails (e.g., source is an animated GIF or highly complex)
         if (!fsSync.existsSync(pngOut)) {
           await sharp(abs)
             .resize({ width: size, withoutEnlargement: true })
@@ -61,7 +62,6 @@ async function processFile(file) {
   );
 }
 
-// ⬇️ UPDATED: Uses the promisified glob function
 function collectFiles() {
   return globAsync(imageGlob, { nodir: true });
 }
