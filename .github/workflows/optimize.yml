@@ -122,4 +122,13 @@ jobs:
 
           git rm -rf . || true
           cp -a $GITHUB_WORKSPACE/optimized/. . || true
-          cp -f $GITHUB_WORKSPACE/optimization-report_
+          cp -f $GITHUB_WORKSPACE/optimization-report.md ./optimization-report.md || true
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "🔧 Resized images and produced WebP variants"
+          fi
+
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:optimized --force || true
